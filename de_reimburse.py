@@ -26,7 +26,7 @@ reim_col =['supplier_ban', 'sme_ban', 'order_num', 'order_status', 'reimburse_st
 reimburse.columns =reim_col
 
 
-reimburse.to_csv('reimburse.csv')
+reimburse.to_csv(directory_name+'/'+'reimburse.csv')
 
 # Imports the Google Cloud client library
 from google.cloud import storage
