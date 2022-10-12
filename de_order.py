@@ -31,8 +31,8 @@ order_basic = order[['sme_ban', 'sme_name', 'sme_address', 'order_date', 'order_
        'order_change_date', 'return_point', 'return_pay', 'solution_duration', 'contract_start_date', 'contract_end_date','point_source']]
 order_further = order[['sme_ban','order_num','order_status', 'solution_uuid', 'solution_name','reimburse_status','invoice_check1', 'invoice_check2', 'review_status','allowence_price', 'allowence_date', 'unreimbuse_point']]
 
-order_basic.to_csv('order_basic.csv')
-order_further.to_csv('order_further.csv')
+order_basic.to_csv(directory_name+'/'+'order_basic.csv')
+order_further.to_csv(directory_name+'/'+'order_further.csv')
 
 # Imports the Google Cloud client library
 from google.cloud import storage
