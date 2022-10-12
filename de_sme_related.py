@@ -128,9 +128,9 @@ sme_point_col =['sme_ban',
 
 sme_points.columns = sme_point_col
 
-sme_basic.to_csv('sme_basic.csv')
-sme_questionnaire.to_csv('sme_questionnaire.csv')
-sme_points.to_csv('sme_points.csv')
+sme_basic.to_csv(directory_name+'/'+'sme_basic.csv')
+sme_questionnaire.to_csv(directory_name+'/'+'sme_questionnaire.csv')
+sme_points.to_csv(directory_name+'/'+'sme_points.csv')
 
 # Imports the Google Cloud client library
 from google.cloud import storage
