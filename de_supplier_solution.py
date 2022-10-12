@@ -30,8 +30,8 @@ solution_col = ['supplier_ban','supplier_name', 'solution_uuid','solution_name',
 supplier.columns = supplier_col
 solutions.columns = solution_col
 
-supplier.to_csv('supplier.csv')
-solutions.to_csv('solution.csv')
+supplier.to_csv(directory_name+'/'+'supplier.csv')
+solutions.to_csv(directory_name+'/'+'solution.csv')
 
 # Imports the Google Cloud client library
 from google.cloud import storage
