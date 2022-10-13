@@ -52,3 +52,15 @@ table_id = 'tcloud-data-analysis.tcloud_analytic_db.budget_monitor'
  
 job = client.load_table_from_dataframe(point_mon, table_id)
 job.result()  #等待寫入完成
+
+
+
+
+dataset_ref = client.dataset('tcloud_analytics_iii')
+table_ref = dataset_ref.table('budget_monitor_latest')
+job_config = bigquery.job.LoadJobConfig()
+job_config.write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
+
+client.load_table_from_dataframe(point_mon, table_ref, job_config=job_config)
+
+
