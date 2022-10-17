@@ -30,6 +30,21 @@ solution_col = ['supplier_ban','supplier_name', 'solution_uuid','solution_name',
 supplier.columns = supplier_col
 solutions.columns = solution_col
 
+#supplier 型別
+datetp =['change_date','supplier_built_date']
+for i in datetp:
+  supplier[i] = pd.to_datetime(supplier[i])
+
+supplier['supplier_ban'] = supplier['supplier_ban'].astype('str') 
+
+#solution 型別
+datetp1 =['change_date','sol_built_date']
+for i in datetp1:
+  solutions[i] = pd.to_datetime(solutions[i])
+solutions['supplier_ban'] = solutions['supplier_ban'].astype('str') 
+
+
+ #to csv   
 supplier.to_csv(directory_name+'/'+'supplier.csv')
 solutions.to_csv(directory_name+'/'+'solution.csv')
 
@@ -64,3 +79,26 @@ upload_blob('tcloud_bq_files', directory_name + '/supplier.csv','supplier.csv')
 upload_blob('tcloud_bq_files',directory_name + '/solution.csv','solution.csv')
 
 print('Supplier & Solution files have done!')
+
+
+#to bigquery
+from google.cloud import bigquery
+credentials_path = "/home/tcloud_iii_gcp/front_to_bq.json"
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
+client = bigquery.Client()
+#table_id = 'tcloud-data-analysis.tcloud_analytic_db.order_basic'
+ 
+#job = client.load_table_from_dataframe(point_mon, table_id)
+#job.result()  #等待寫入完成
+
+#order_basic
+dataset_ref = client.dataset('tcloud_analytic_db')
+table_ref = dataset_ref.table('solution_info')
+table_ref1 = dataset_ref.table('supplier_info')
+job_config = bigquery.job.LoadJobConfig()
+job_config.write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
+client.load_table_from_dataframe(solutions, table_ref, job_config=job_config)
+client.load_table_from_dataframe(supplier, table_ref1, job_config=job_config)
+
+
+print('Order files have sent to Bigquery!')
