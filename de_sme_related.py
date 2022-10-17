@@ -15,10 +15,12 @@ sme = pd.read_csv(objfile, header='infer')
 town = pd.read_csv('/home/tcloud_iii_gcp/dataengineer/Taiwan_town-town.csv', header='infer')
 
 sme_basic = sme[['統一編號', '公司名稱', '公司地址', '行業類別代碼', '行業大類代碼', '行業中類代碼', '行業小類代碼',
-       '行業細類代碼', '行業子類代碼', '設立登記日期', '實收資本額', '員工人數', '異動日期', '狀態', '參考的解決方案']]
+       '行業細類代碼', '行業子類代碼', '設立登記日期', '實收資本額', '員工人數', '異動日期', '狀態', '參考的解決方案',
+       '點數狀態','SME建立日期', '點數建立日期']]
 
 sme_basic_colnm= ['sme_ban', 'sme_name', 'sme_address',  'ind_class', 'ind_large', 'ind_medium', 'ind_small',
- 'ind_division', 'ind_sub', 'estabilish_data', 'capital', 'employee_count', 'chage_date', 'apply_status', 'ref_solution']
+ 'ind_division', 'ind_sub', 'estabilish_data', 'capital', 'employee_count', 'change_date', 'apply_status', 'ref_solution','point_status',
+'sme_est_date','point_est_date']
 #換標頭
 sme_basic.columns = sme_basic_colnm
 
@@ -38,6 +40,15 @@ for i in range(len(sme_basic)):
   districtls.append(add_district(sme_basic['sme_address'][i]))
 
 sme_basic['district']=districtls
+
+#smebasic改型別
+datetp = ['estabilish_data','change_date','sme_est_date','point_est_date']
+for i in datetp:
+    sme_basic[i] = pd.to_datetime(sme_basic[i])
+strtp =['sme_ban', 'ind_class','ind_medium','ind_small','ind_division']
+for j in strtp:
+    sme_basic[j] =sme_basic[j].astype('str').replace('\.0', '', regex=True)
+
 
 sme_questionnaire =sme[['統一編號', '公司名稱','請問貴公司所屬的產業類別？', '請問公司主要產品/營業項目？', '請問貴公司目前的組織規模？',
        '請問貴公司主要經營的市場？', '請問貴公司今年度投入使用雲端服務或數位化工具的預算數為？',
@@ -61,32 +72,11 @@ sme_points =sme[['統一編號', '公司名稱','申請點數次數', '現有實
        'SME建立日期', '點數建立日期', '點數異動日期', '點數異動原因', '點數到期日期', '認證方式', '點數來源',
        '僅稅籍登記']]
 
-sme_q_col =['sme_ban', 'sme_name','q_industry',
-'q_mainproduct',
-'q_organizationsize',
-'q_marketplace',
-'q_budget',
-'q_planningtime',
-'q_operation_now',
-'q_operation_2y',
-'q_schecule_now',
-'q_schecule_2y',
-'q_remote_now',
-'q_remote_2y',
-'q_security_now',
-'q_security_2y',
-'q_sales_now',
-'q_sales_2y',
-'q_marketing_now',
-'q_marketing_2y',
-'q_problems',
-'q_difficulty',
-'score_operation',
-'score_marketing',
-'score_sales',
-'score_security',
-'score_remote',
-'score_schedule']
+sme_q_col =['sme_ban', 'sme_name','q_industry','q_mainproduct','q_organizationsize',
+'q_marketplace','q_budget', 'q_planningtime', 'q_operation_now', 'q_operation_2y','q_schecule_now',
+'q_schecule_2y','q_remote_now', 'q_remote_2y','q_security_now', 'q_security_2y','q_sales_now','q_sales_2y',
+'q_marketing_now', 'q_marketing_2y', 'q_problems','q_difficulty','score_operation','score_marketing','score_sales',
+'score_security','score_remote', 'score_schedule']
 
 sme_questionnaire.columns = sme_q_col
 sme_questionnaire[['q_industry',
@@ -109,25 +99,21 @@ sme_questionnaire[['q_industry',
 'q_marketing_2y',
 'q_problems',
 'q_difficulty',]].fillna('NA', inplace=True)
-
-
-sme_point_col =['sme_ban',
-'sme_name',
-'apply_time',
-'points',
-'return_points',
-'point_status',
-'sme_est_date',
-'point_est_date',
-'point_change_date',
-'point_change_reason',
-'point_due_date',
-'authen_method',
-'point_source',
-'tax_applier']
+#sme_questionnaire改型別
+sme_questionnaire['sme_ban'] =sme_questionnaire['sme_ban'].astype('str')
+#sme point
+sme_point_col =['sme_ban','sme_name','apply_time','points','return_points','point_status',
+'sme_est_date','point_est_date', 'point_change_date', 'point_change_reason','point_due_date',
+'authen_method','point_source', 'tax_applier']
 
 sme_points.columns = sme_point_col
+#sme_point 換型別
+sme_points['sme_ban'] =sme_points['sme_ban'].astype('str')
+datetp1 = ['sme_est_date','point_est_date','point_change_date','point_due_date']
+for j in datetp1:
+    sme_points[i] = pd.to_datetime(sme_points[i])
 
+#to csv
 sme_basic.to_csv(directory_name+'/'+'sme_basic.csv')
 sme_questionnaire.to_csv(directory_name+'/'+'sme_questionnaire.csv')
 sme_points.to_csv(directory_name+'/'+'sme_points.csv')
@@ -166,3 +152,27 @@ smequpath = directory_name + '/sme_questionnaire.csv'
 upload_blob('tcloud_bq_files',smebasicpth,'sme_basic.csv')
 upload_blob('tcloud_bq_files',smeptpth,'sme_points.csv')
 upload_blob('tcloud_bq_files',smequpath,'sme_questionnaire.csv')
+
+
+#to bigquery
+from google.cloud import bigquery
+credentials_path = "/home/tcloud_iii_gcp/front_to_bq.json"
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
+client = bigquery.Client()
+
+
+
+#
+dataset_ref = client.dataset('tcloud_analytic_db')
+table_ref = dataset_ref.table('sme_basic')
+table_ref1 = dataset_ref.table('sme_points')
+table_ref2 = dataset_ref.table('sme_questionnaire')
+
+job_config = bigquery.job.LoadJobConfig()
+job_config.write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
+client.load_table_from_dataframe(sme_basic, table_ref, job_config=job_config)
+client.load_table_from_dataframe(sme_points, table_ref1, job_config=job_config)
+client.load_table_from_dataframe(sme_questionnaire, table_ref2, job_config=job_config)
+
+
+print('SME files have sent to Bigquery!')
