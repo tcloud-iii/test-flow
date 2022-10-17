@@ -3,6 +3,7 @@
 import pandas as pd
 import os
 
+
 directory_name = '/home/tcloud_iii_gcp/test-flow'
 
 for file_name in os.listdir(directory_name):
@@ -23,7 +24,16 @@ order_col =['sme_ban', 'sme_name', 'sme_address', 'order_date', 'order_num', 'or
 'contract_start_date', 'contract_end_date', 'allowence_price', 'allowence_date', 'unreimbuse_point', 'point_source']
 
 order.columns = order_col
+#改欄位型別
+datetp =['order_date', 'order_est_date', 'order_change_date','contract_start_date','contract_end_date']
+for i in datetp:
+  order[i] = pd.to_datetime(order[i])
 
+strtp =['sme_ban', 'order_num']
+for j in strtp:
+    order[j] = order[j].astype('str') 
+
+#分成兩個表
 
 order_basic = order[['sme_ban', 'sme_name', 'sme_address', 'order_date', 'order_num',
        'order_status', 'solution_uuid', 'solution_name', 'solution_spec',
@@ -67,3 +77,26 @@ upload_blob('tcloud_bq_files',directory_name+'/order_basic.csv','order_basic.csv
 upload_blob('tcloud_bq_files',directory_name+'/order_further.csv','order_further.csv')
 
 print('Order file has done!')
+
+
+#to bigquery
+from google.cloud import bigquery
+credentials_path = "/home/tcloud_iii_gcp/front_to_bq.json"
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
+client = bigquery.Client()
+#table_id = 'tcloud-data-analysis.tcloud_analytic_db.order_basic'
+ 
+#job = client.load_table_from_dataframe(point_mon, table_id)
+#job.result()  #等待寫入完成
+
+#order_basic
+dataset_ref = client.dataset('tcloud_analytic_db')
+table_ref = dataset_ref.table('order_basic')
+table_ref1 = dataset_ref.table('order_futher')
+job_config = bigquery.job.LoadJobConfig()
+job_config.write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
+client.load_table_from_dataframe(order_basic, table_ref, job_config=job_config)
+client.load_table_from_dataframe(order_further, table_ref1, job_config=job_config)
+
+
+print('Order files have sent to Bigquery!')
